@@ -1,9 +1,9 @@
 import requests
 from config.config import load_config
 
-config = load_config(section='api-ninja')
-__ENDPOINT = config["zipcode_endpoint"]
-__KEY = config["key"]
+__config = load_config(section='api-ninja')
+__ENDPOINT = __config["zipcode_endpoint"]
+__KEY = __config["key"]
 
 def get_zipcode(city, state):
     '''
@@ -22,7 +22,9 @@ def get_zipcode(city, state):
     try:
         response = requests.get(__ENDPOINT, params=params, headers=headers)
         res_object = response.json()
-        return res_object[0]["zip_code"]
+        if len(res_object) == 0:
+            return None
+        else:
+            return res_object[0]["zip_code"]
     except (Exception) as err:
-        print("Something went wrong.")
         print("ERROR", err)
