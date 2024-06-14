@@ -2,13 +2,13 @@ from flask import Flask, request
 
 from repositories.lane import Lane
 from utils.functions import copy_excel_template
-from config import config, db_connection
+from config import db_connection, db_config
 
 app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def create_excel():
-    config = config.load_config(section='postgresql')
+    config = db_config.load_config(section='postgresql')
     conn = db_connection.connect(config)
 
     # GET LANE REPOSITORY METHODS WITH CONNECTION.

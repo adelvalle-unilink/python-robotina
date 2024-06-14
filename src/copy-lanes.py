@@ -1,7 +1,10 @@
 import json
 import requests
 import pandas as pd
-from utils.api_ninja import get_zipcode
+# from config import db_config, db_connection
+# from repositories.lane import Lane
+# from utils.functions import copy_excel_template
+# from utils.api_ninja import get_zipcode
 
 df = pd.read_csv("lanes.csv")
 #1.-
@@ -26,40 +29,80 @@ df = pd.read_csv("lanes.csv")
 # with open("zipcodes.json", "w") as outfile:
 #     outfile.write(json_object)
 
-#1.-
+#2.-
 # CREATE LANES OBJECT.
 ## ADD ZIPCODE AND EQUIPMENT_ID = 3 TO ALL LANES
 # GET ZIPCODES
-lanes = []
-zipcodes_json = open("zipcodes.json")
-zipcodes = json.load(zipcodes_json)
-for indx in range(200):
-    origin = df.at[indx, "Origin"]
-    destination = df.at[indx, "Destination"]
+# lanes = []
+# zipcodes_json = open("zipcodes.json")
+# zipcodes = json.load(zipcodes_json)
+# for indx in range(200):
+#     origin = df.at[indx, "Origin"]
+#     destination = df.at[indx, "Destination"]
     
-    origin_zipcode = zipcodes[origin]
-    destination_zipcode = zipcodes[destination]
-    lane = {
-        "origin_zipcode": origin_zipcode,
-        "destination_zipcode": destination_zipcode,
-        "equipment_id": 3,
-    }
-    lanes.append(lane)
+#     origin_zipcode = zipcodes[origin]
+#     destination_zipcode = zipcodes[destination]
+#     lane = {
+#         "origin_zipcode": origin_zipcode,
+#         "destination_zipcode": destination_zipcode,
+#         "equipment_id": 3,
+#     }
+#     lanes.append(lane)
     
-# SAVE LANES IN A JSON FILE ==>
-json_object = json.dumps(lanes, indent=4)
-with open("lanes.json", "w") as outfile:
-    outfile.write(json_object)    
+# # SAVE LANES IN A JSON FILE ==>
+# json_object = json.dumps(lanes, indent=4)
+# with open("lanes.json", "w") as outfile:
+#     outfile.write(json_object)    
 
+# 3.-
 # CREATE LANE IN DATABASE ==>
+# DID IT FORM MY LOCAL. CHANGE THE URL TO USO PRODUCTION OR DEV ENVIRONMENT.
 # READT LANE JSON
-# lanes_json = open("lanes.json")
-# lanes_array = json.load(lanes_json)
-# user = "989f91c0-557b-4da0-901c-e47f9c8ca27c"
-# for lane in lanes_array:
-#     print("LANE ==>", lane)
-#     res = requests.get(
-#         "http://127.0.0.1:5055/api/v1/consults?equipment={equipment}&origin_zipcode={o_zip}&destination_zipcode={d_zip}".format(equipment=lane["equipment_id"], o_zip=lane["origin_zipcode"], d_zip=lane["destination_zipcode"])
-#     )
-#     print("response ==>", res)
+errors = []
+ok = []
+lanes_json = open("lanes.json")
+lanes_array = json.load(lanes_json)
+user = "989f91c0-557b-4da0-901c-e47f9c8ca27c"
+for lane in lanes_array:
+    print("LANE ==>", lane)
+    res = requests.get(
+        "http://127.0.0.1:5055/api/v1/consults?equipment={equipment}&origin_zipcode={o_zip}&destination_zipcode={d_zip}"
+            .format(
+                equipment=lane["equipment_id"], 
+                o_zip=lane["origin_zipcode"], 
+                d_zip=lane["destination_zipcode"],
+            )
+    )
+    print("RESPONSE ==>", res)
+    res_json = res.json()
+    is_success = res_json["success"]
     
+    if is_success: ok.append(res_json["data"]["lane_id"])
+
+# SAVE RESPONSES
+errors_json_object = json.dumps(errors, indent=4)
+with open("errors.json", "w") as outfile:
+    outfile.write(errors_json_object)    
+    
+ok_json_object = json.dumps(ok, indent=4)
+with open("ok.json", "w") as outfile:
+    outfile.write(ok_json_object)    
+    
+    
+# # 4.-
+# config = db_config.load_config(section='postgresql')
+# conn = db_connection.connect(config)
+
+# ok_lanes_json = open("ok.json")
+# ok_lanes = json.load(ok_lanes_json)
+
+# def get_ids(lane):
+#     pass
+
+# ids = map(get_ids, ok_lanes)
+
+# # GET LANE REPOSITORY METHODS WITH CONNECTION.
+# lane = Lane(conn)
+# lanes = lane.get_all(ids)
+# copy_excel_template(lanes)
+# conn.close()
