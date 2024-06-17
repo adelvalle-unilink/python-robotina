@@ -1,5 +1,5 @@
 import requests
-from config.config import load_config
+from config.db_config import load_config
 
 __config = load_config(section='api-ninja')
 __ENDPOINT = __config["zipcode_endpoint"]

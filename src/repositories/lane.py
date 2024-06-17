@@ -1,9 +1,15 @@
 class Lane():
     def __init__(self, db_connection):
         self.connection = db_connection
-        
-        
+
+
     def get_all(self, ids):
+        '''
+            Returns a tuple:
+            0.-lane_id, 1.-origin_zipcode, 2.-destination_zipcode, 3.-equipment_name,
+            4.-equipment_id, 5.-origin_city_name, 6.-destination_city_name,
+            7.-origin_state_name, 8.-destination_state_name, 9.-miles
+        '''
         cursor = self.connection.cursor()
         
         sql = '''
@@ -36,3 +42,19 @@ class Lane():
         cursor.execute(sql)
         return cursor.fetchall()
     
+    
+    def add_distance(self, lane_id, distance):
+        '''
+            A distance in miles to a specific lane.
+        '''
+        
+        cursor = self.connection.cursor()
+        sql = '''
+            UPDATE lane
+            SET miles = {miles}, updated_at = '05-17-2024'::DATE, updated_by = '989f91c0-557b-4da0-901c-e47f9c8ca27c'
+            WHERE id = {id}
+        '''.format(miles=distance, id=lane_id)
+
+        cursor.execute(sql)
+
+        
