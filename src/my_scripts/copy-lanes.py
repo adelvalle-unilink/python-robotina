@@ -1,13 +1,15 @@
 import json
 # import requests
-# import pandas as pd
+import pandas as pd
 from config.db_connection import connect
 from config.generic_config import load_config
 from utils.geocoder import get_distance
+from openpyxl import load_workbook
 # from utils.api_ninja import get_zipcode
 
 # from src.config import db_connection
 from repositories.lane import Lane
+from repositories.benchmark import Benchmark
 from utils.functions import copy_excel_template
 
 # DB CONNECTION
@@ -161,3 +163,25 @@ conn.autocommit = True
 # GET BENCHMARK EXCEL WITH ALL THE INFORMATION.
 
 # SAVE BENCHMARK INFORMATION FOR EACH LANE IN DATABASE.
+# READT EXCEL FILE
+df = pd.read_excel("main-lanes.xlsx")
+benchmark = Benchmark(conn)
+
+row = 1
+for indx in df.index:
+    if indx < 3: None
+    else:
+        lane_id = df.iat[row, 0]
+        low_price = df.iat[row, 37]
+        fair_price = df.iat[row, 38]
+        high_price = df.iat[row, 39]
+        row += 1
+
+        if fair_price > 0:
+            print("LANE ID ==>", lane_id)
+            print("Low Price ==>", low_price)
+            print("Fair Price ==>", fair_price)
+            print("High Price ==>", high_price)
+            benchmark.insert(lane_id, low_price, fair_price, high_price)
+
+        
